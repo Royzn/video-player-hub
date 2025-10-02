@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">video-player-hub</string>
+    <string name="profile_avatar">Profile Avatar</string>
 </resources>
