@@ -10,10 +10,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.video_player_hub.data.LoginRequest
-import com.example.video_player_hub.data.LoginResponse
 import com.example.video_player_hub.network.ReqresApiClient
 import com.example.video_player_hub.util.TokenManager
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -28,12 +26,11 @@ class MainActivity : ComponentActivity() {
 
         val token = TokenManager.getToken(this)
         if (!token.isNullOrEmpty()) {
-            // Token exists, navigate directly to ContentActivity
             val intent = Intent(this, ContentActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
-            finish() // Close login activity
-            return // Prevent rest of onCreate from running
+            finish()
+            return
         }
 
         setContentView(R.layout.login_page)

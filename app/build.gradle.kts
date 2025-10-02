@@ -101,4 +101,5 @@ dependencies {
 
     // Activity KTX (permission launcher & results)
     implementation("androidx.activity:activity-ktx:1.9.2")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }
