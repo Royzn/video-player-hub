@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
         emailEditText = findViewById(R.id.emailEditText)
         passwordEditText = findViewById(R.id.passwordEditText)
         loginButton = findViewById(R.id.loginButton)
-        progress = findViewById(R.id.progress) // You missed this
+        progress = findViewById(R.id.progress)
     }
 
     private fun login() {
