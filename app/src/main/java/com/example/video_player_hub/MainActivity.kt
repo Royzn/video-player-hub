@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
                 loginButton.visibility = View.VISIBLE
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(this@MainActivity, "Login failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, "Login failed: Invalid Credentials. Please Try Again", Toast.LENGTH_SHORT).show()
                 progress.visibility = View.GONE
                 loginButton.visibility = View.VISIBLE
             }
