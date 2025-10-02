@@ -8,11 +8,13 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.video_player_hub.adapter.ContentAdapter
 import com.example.video_player_hub.data.Post
 import com.example.video_player_hub.network.ContentApiClient
@@ -28,6 +30,9 @@ class ContentActivity : ComponentActivity() {
     private var fullPostList = listOf<Post>()
     private lateinit var progressBar: ProgressBar
     private lateinit var profileButton: Button
+    private lateinit var errorTextView: TextView
+    private lateinit var emptyTextView: TextView
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,10 +48,7 @@ class ContentActivity : ComponentActivity() {
             return
         }
 
-        contentRecyclerView = findViewById(R.id.contentRecyclerView)
-        searchEditText = findViewById(R.id.searchEditText)
-        progressBar = findViewById(R.id.progressBar)
-        profileButton = findViewById(R.id.profileButton)
+        initView()
 
         contentAdapter = ContentAdapter(
             fullList = mutableListOf(),
@@ -65,19 +67,46 @@ class ContentActivity : ComponentActivity() {
             val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
+
+        swipeRefreshLayout.setOnRefreshListener {
+            loadPosts()
+        }
+    }
+
+    private fun initView(){
+        contentRecyclerView = findViewById(R.id.contentRecyclerView)
+        searchEditText = findViewById(R.id.searchEditText)
+        progressBar = findViewById(R.id.progressBar)
+        profileButton = findViewById(R.id.profileButton)
+        errorTextView = findViewById(R.id.errorTextView)
+        emptyTextView = findViewById(R.id.emptyTextView)
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
     }
 
     private fun loadPosts() {
         progressBar.visibility = View.VISIBLE
+        errorTextView.visibility = View.GONE
+        emptyTextView.visibility = View.GONE
+        contentRecyclerView.visibility = View.GONE
+        swipeRefreshLayout.isRefreshing = false
+
         lifecycleScope.launch {
             try {
                 fullPostList = ContentApiClient.api.getPosts(token)
-                contentAdapter.setData(fullPostList)
+                if (fullPostList.isEmpty()) {
+                    // No data found
+                    emptyTextView.visibility = View.VISIBLE
+                } else {
+                    contentAdapter.setData(fullPostList)
+                    contentRecyclerView.visibility = View.VISIBLE
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(this@ContentActivity, "Failed to load posts: ${e.message}", Toast.LENGTH_LONG).show()
+                errorTextView.text = "Failed to load posts. Please check your connection."
+                errorTextView.visibility = View.VISIBLE
             } finally {
                 progressBar.visibility = View.GONE
+                swipeRefreshLayout.isRefreshing = false
             }
         }
     }
@@ -101,7 +130,16 @@ class ContentActivity : ComponentActivity() {
                 post.title.contains(query, ignoreCase = true)
             }
         }
+
         contentAdapter.setData(filteredList)
+
+        if (filteredList.isEmpty()) {
+            emptyTextView.visibility = View.VISIBLE
+            contentRecyclerView.visibility = View.GONE
+        } else {
+            emptyTextView.visibility = View.GONE
+            contentRecyclerView.visibility = View.VISIBLE
+        }
     }
 
     private fun onViewDetailClick(post: Post) {

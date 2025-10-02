@@ -5,14 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    card_view:cardCornerRadius="8dp"
-    card_view:cardElevation="4dp"
-    android:padding="16dp">
+    card_view:cardCornerRadius="12dp"
+    card_view:cardElevation="6dp"
+    android:background="@android:color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_margin="16dp"
         android:orientation="vertical">
 
         <!-- Title -->
@@ -23,7 +23,7 @@
             android:text="Post Title"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"/>
+            android:textColor="#333333" />
 
         <!-- Body -->
         <TextView
@@ -32,10 +32,10 @@
             android:layout_height="wrap_content"
             android:text="This is the body of the post..."
             android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
-            android:layout_marginTop="4dp"
+            android:textColor="#666666"
+            android:layout_marginTop="6dp"
             android:maxLines="3"
-            android:ellipsize="end"/>
+            android:ellipsize="end" />
 
         <!-- View Detail Button -->
         <Button
@@ -43,9 +43,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="View Detail"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#6200EE"
             android:layout_gravity="end"
-            android:layout_marginTop="8dp"/>
-
+            android:layout_marginTop="12dp"
+            android:minWidth="88dp"
+            android:minHeight="40dp"
+            android:paddingHorizontal="20dp"
+            android:background="@drawable/rounded_button" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>
