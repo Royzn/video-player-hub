@@ -57,6 +57,7 @@
         android:layout_width="0dp"
         android:layout_height="200dp"
         android:background="#000000"
+        app:show_buffering="when_playing"
         app:layout_constraintTop_toBottomOf="@id/topBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
