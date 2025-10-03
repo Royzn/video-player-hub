@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -36,6 +37,8 @@ class ContentFragment : Fragment() {
     private lateinit var adapter: ContentAdapter
     private lateinit var swipeRefreshLayout: androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
+    private lateinit var profileButton: Button
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,6 +51,7 @@ class ContentFragment : Fragment() {
         emptyTextView = view.findViewById(R.id.emptyTextView)
         searchEditText = view.findViewById(R.id.searchEditText)
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
+        profileButton = view.findViewById(R.id.profileButton)
 
         adapter = ContentAdapter(mutableListOf()) { post ->
             val fragment = ContentDetailFragment.newInstance(post.id)
@@ -131,9 +135,16 @@ class ContentFragment : Fragment() {
             vm.loadPosts()
         }
 
-        // Call loadPosts directly here (outside coroutines)
         if (savedInstanceState == null) {
             vm.loadPosts()
+        }
+
+        profileButton.setOnClickListener {
+            val fragment = ProfileFragment()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
         }
     }
 }
