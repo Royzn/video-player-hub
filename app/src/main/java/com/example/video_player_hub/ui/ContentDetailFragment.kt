@@ -10,6 +10,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.video_player_hub.R
+import com.example.video_player_hub.room.AppDatabase
+import com.example.video_player_hub.room.WatchListDao
 import com.example.video_player_hub.util.TokenManager
 import com.example.video_player_hub.vm.ContentDetailUiState
 import com.example.video_player_hub.vm.ContentDetailViewModel
@@ -22,6 +24,7 @@ import kotlinx.coroutines.launch
 class ContentDetailFragment : Fragment() {
 
     private lateinit var playerView: PlayerView
+    private lateinit var watchListDao: WatchListDao
     private lateinit var progressBar: ProgressBar
     private lateinit var titleTextView: TextView
     private lateinit var bodyTextView: TextView
@@ -31,8 +34,13 @@ class ContentDetailFragment : Fragment() {
     private lateinit var token: String
 
     private val vm: ContentDetailViewModel by viewModels {
-        ContentDetailViewModelFactory(token, this)
+        ContentDetailViewModelFactory(token, this, watchlistDao)
     }
+
+    private lateinit var btnFavorite: Button
+    private lateinit var watchlistDao: WatchListDao
+    private var currentPostId: Int = -1
+    private var isFavorite: Boolean = false
 
     companion object {
         private const val ARG_POST_ID = "post_id"
@@ -53,6 +61,7 @@ class ContentDetailFragment : Fragment() {
             Toast.makeText(requireContext(), "Authentication required", Toast.LENGTH_LONG).show()
             requireActivity().finish()
         }
+        watchlistDao = AppDatabase.get(requireContext()).watchListDao()
     }
 
     override fun onCreateView(
@@ -66,10 +75,8 @@ class ContentDetailFragment : Fragment() {
         titleTextView = view.findViewById(R.id.titleTextView)
         bodyTextView = view.findViewById(R.id.bodyTextView)
         backButton = view.findViewById(R.id.backButton)
-
-        backButton.setOnClickListener {
-            requireActivity().onBackPressed()
-        }
+        btnFavorite = view.findViewById(R.id.btnFavorite)
+        watchlistDao = AppDatabase.get(requireContext()).watchListDao()
 
         val postId = arguments?.getInt(ARG_POST_ID) ?: -1
         if (postId == -1) {
@@ -78,36 +85,48 @@ class ContentDetailFragment : Fragment() {
             return
         }
 
-        // Observe UI state in lifecycle-aware manner
+        btnFavorite.setOnClickListener {
+            vm.toggleFavorite()
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                vm.uiState.collect { state ->
-                    when (state) {
-                        is ContentDetailUiState.Loading -> {
-                            progressBar.visibility = ProgressBar.VISIBLE
-                            titleTextView.text = ""
-                            bodyTextView.text = ""
-                            releasePlayer()
+                launch {
+                    vm.uiState.collect { state ->
+                        when (state) {
+                            is ContentDetailUiState.Loading -> {
+                                progressBar.visibility = ProgressBar.VISIBLE
+                                titleTextView.text = ""
+                                bodyTextView.text = ""
+                                releasePlayer()
+                            }
+                            is ContentDetailUiState.Success -> {
+                                progressBar.visibility = ProgressBar.GONE
+                                titleTextView.text = state.post.title
+                                bodyTextView.text = state.post.body
+                                setupPlayer()
+                            }
+                            is ContentDetailUiState.Error -> {
+                                progressBar.visibility = ProgressBar.GONE
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                                releasePlayer()
+                            }
                         }
+                    }
+                }
 
-                        is ContentDetailUiState.Success -> {
-                            progressBar.visibility = ProgressBar.GONE
-                            titleTextView.text = state.post.title
-                            bodyTextView.text = state.post.body
-                            setupPlayer()
-                        }
-
-                        is ContentDetailUiState.Error -> {
-                            progressBar.visibility = ProgressBar.GONE
-                            Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
-                            releasePlayer()
-                        }
+                launch {
+                    vm.isFavorite.collect { fav ->
+                        btnFavorite.text = if (fav) "Unfavorite" else "Save to Watch Later"
                     }
                 }
             }
         }
 
-        // Trigger post loading
+        backButton.setOnClickListener {
+            requireActivity().onBackPressed()
+        }
+
         vm.loadPost(postId)
     }
 

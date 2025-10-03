@@ -11,6 +11,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
+import com.example.video_player_hub.room.WatchListDao
+import com.example.video_player_hub.room.WatchList
 
 sealed class ContentDetailUiState {
     object Loading : ContentDetailUiState()
@@ -20,7 +22,8 @@ sealed class ContentDetailUiState {
 
 class ContentDetailViewModel(
     private val token: String,
-    private val state: SavedStateHandle // add SavedStateHandle here
+    private val state: SavedStateHandle,
+    private val watchListDao: WatchListDao
 ) : ViewModel() {
 
     companion object {
@@ -29,6 +32,11 @@ class ContentDetailViewModel(
 
     private val _uiState = MutableStateFlow<ContentDetailUiState>(ContentDetailUiState.Loading)
     val uiState: StateFlow<ContentDetailUiState> = _uiState
+
+    private val _isFavorite = MutableStateFlow(false)
+    val isFavorite: StateFlow<Boolean> = _isFavorite
+
+    private var currentPost: Post? = null
 
     var playbackPosition: Long
         get() = state.get<Long>(PLAYBACK_POSITION_KEY) ?: 0L
@@ -41,18 +49,45 @@ class ContentDetailViewModel(
         viewModelScope.launch {
             try {
                 val post = ContentApiClient.api.getPostById(token, postId)
+                currentPost = post
                 _uiState.value = ContentDetailUiState.Success(post)
+
+                // Check if post is in watchlist
+                val watchLaterItem = watchListDao.getByPostId(postId)
+                _isFavorite.value = watchLaterItem != null
             } catch (e: Exception) {
                 _uiState.value = ContentDetailUiState.Error("Failed to load post: ${e.message}")
+            }
+        }
+    }
+
+    fun toggleFavorite() {
+        val post = currentPost ?: return
+        viewModelScope.launch {
+            val exists = watchListDao.getByPostId(post.id)
+            if (exists != null) {
+                watchListDao.delete(exists)
+                _isFavorite.value = false
+            } else {
+                val item = WatchList(
+                    id = post.id.toLong(),
+                    title = post.title,
+                    excerpt = post.body.take(100),
+                    savedAt = System.currentTimeMillis()
+                )
+                watchListDao.insert(item)
+                _isFavorite.value = true
             }
         }
     }
 }
 
 
+
 class ContentDetailViewModelFactory(
     private val token: String,
-    owner: SavedStateRegistryOwner,
+    private val owner: SavedStateRegistryOwner,
+    private val watchListDao: WatchListDao,
     defaultArgs: Bundle? = null
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
 
@@ -63,8 +98,9 @@ class ContentDetailViewModelFactory(
     ): T {
         if (modelClass.isAssignableFrom(ContentDetailViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ContentDetailViewModel(token, handle) as T
+            return ContentDetailViewModel(token, handle, watchListDao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
+
