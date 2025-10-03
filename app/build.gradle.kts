@@ -52,6 +52,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.cardview)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.fragment)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -102,4 +104,17 @@ dependencies {
     // Activity KTX (permission launcher & results)
     implementation("androidx.activity:activity-ktx:1.9.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
+    //  activityViewModels(), viewModels()
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
+
+    // ViewModel + coroutine scope
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+
+    //  LiveData
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+
+
 }

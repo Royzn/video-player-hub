@@ -8,13 +8,14 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.video_player_hub.data.LoginRequest
 import com.example.video_player_hub.network.ReqresApiClient
 import com.example.video_player_hub.util.TokenManager
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var emailEditText: EditText
     private lateinit var passwordEditText: EditText
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
 
         val token = TokenManager.getToken(this)
         if (!token.isNullOrEmpty()) {
-            val intent = Intent(this, ContentActivity::class.java)
+            val intent = Intent(this, HomeActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             finish()
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity() {
                 val token = ReqresApiClient.api.loginUser(LoginRequest(email, password))
                 TokenManager.saveToken(this@MainActivity, token.token)
 
-                val intent = Intent(this@MainActivity, ContentActivity::class.java)
+                val intent = Intent(this@MainActivity, HomeActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
                 finish()

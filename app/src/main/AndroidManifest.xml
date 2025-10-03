@@ -26,9 +26,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ContentActivity" />
-        <activity android:name=".ProfileActivity" />
-        <activity android:name=".ContentDetailActivity" />
+        <activity android:name=".HomeActivity" />
 
     </application>
 
