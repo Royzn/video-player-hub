@@ -39,7 +39,6 @@ class ContentViewModel(private val token: String) : ViewModel() {
             _uiState.value = ContentUiState.Loading
             try {
                 val posts = ContentApiClient.api.getPosts(token)
-                Log.d("ContentViewModel", "Loaded posts size: ${posts.size}")
                 _fullPostList.clear()
                 _fullPostList.addAll(posts)
                 filterPosts(_currentQuery.value)

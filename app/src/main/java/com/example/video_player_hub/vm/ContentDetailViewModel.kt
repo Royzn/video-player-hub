@@ -66,7 +66,7 @@ class ContentDetailViewModel(
         viewModelScope.launch {
             val exists = watchListDao.getByPostId(post.id)
             if (exists != null) {
-                watchListDao.delete(exists)
+                watchListDao.deleteById(exists.id)
                 _isFavorite.value = false
             } else {
                 val item = WatchList(
